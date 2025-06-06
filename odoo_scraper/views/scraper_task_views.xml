@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 树形视图 -->
+    <record id="view_scraper_task_tree" model="ir.ui.view">
+        <field name="name">scraper.task.tree</field>
+        <field name="model">scraper.task</field>
+        <field name="arch" type="xml">
+            <tree string="爬虫任务">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="need_login"/>
+                <field name="session_valid" widget="boolean_toggle"/>
+                <field name="state"/>
+                <field name="last_run_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- 表单视图 -->
+    <record id="view_scraper_task_form" model="ir.ui.view">
+        <field name="name">scraper.task.form</field>
+        <field name="model">scraper.task</field>
+        <field name="arch" type="xml">
+            <form string="爬虫任务">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,ready,running,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="任务名称"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="url"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="create_date"/>
+                            <field name="last_run_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="登录配置" name="login_config">
+                            <group>
+                                <group>
+                                    <field name="need_login"/>
+                                    <field name="login_type" attrs="{'invisible': [('need_login', '=', False)], 'required': [('need_login', '=', True)]}"/>
+                                </group>
+                                <group>
+                                    <field name="session_valid"/>
+                                    <field name="last_login_time"/>
+                                    <field name="session_timeout" attrs="{'invisible': [('need_login', '=', False)]}"/>
+                                </group>
+                            </group>
+                            <!-- 表单登录配置 -->
+                            <group attrs="{'invisible': [('login_type', '!=', 'form')]}">
+                                <group string="表单登录配置">
+                                    <field name="login_url" attrs="{'required': [('login_type', '=', 'form')]}"/>
+                                    <field name="username_field" attrs="{'required': [('login_type', '=', 'form')]}"/>
+                                    <field name="password_field" attrs="{'required': [('login_type', '=', 'form')]}"/>
+                                    <field name="username" attrs="{'required': [('login_type', '=', 'form')]}"/>
+                                    <field name="password" password="True" attrs="{'required': [('login_type', '=', 'form')]}"/>
+                                </group>
+                            </group>
+                            <!-- API登录配置 -->
+                            <group attrs="{'invisible': [('login_type', '!=', 'api')]}">
+                                <group string="API登录配置">
+                                    <field name="api_login_url" attrs="{'required': [('login_type', '=', 'api')]}"/>
+                                    <field name="api_params" attrs="{'required': [('login_type', '=', 'api')]}" widget="ace" options="{'mode': 'json'}"/>
+                                </group>
+                            </group>
+                            <!-- Cookie登录配置 -->
+                            <group attrs="{'invisible': [('login_type', '!=', 'cookie')]}">
+                                <group string="Cookie配置">
+                                    <field name="cookies" attrs="{'required': [('login_type', '=', 'cookie')]}" widget="ace" options="{'mode': 'json'}"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="备注" name="notes">
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 搜索视图 -->
+    <record id="view_scraper_task_search" model="ir.ui.view">
+        <field name="name">scraper.task.search</field>
+        <field name="model">scraper.task</field>
+        <field name="arch" type="xml">
+            <search string="搜索爬虫任务">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="state"/>
+                <filter string="需要登录" name="need_login" domain="[('need_login', '=', True)]"/>
+                <filter string="会话有效" name="session_valid" domain="[('session_valid', '=', True)]"/>
+                <filter string="活跃任务" name="active" domain="[('active', '=', True)]"/>
+                <group expand="0" string="分组">
+                    <filter string="状态" name="state" context="{'group_by': 'state'}"/>
+                    <filter string="登录类型" name="login_type" context="{'group_by': 'login_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- 动作 -->
+    <record id="action_scraper_task" model="ir.actions.act_window">
+        <field name="name">爬虫任务</field>
+        <field name="res_model">scraper.task</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                创建第一个爬虫任务
+            </p>
+            <p>
+                在这里管理你的网页爬虫任务。
+            </p>
+        </field>
+    </record>
+
+    <!-- 菜单项 -->
+    <menuitem id="menu_scraper_root" name="网页爬虫" sequence="10"/>
+    <menuitem id="menu_scraper_task" name="爬虫任务" parent="menu_scraper_root" action="action_scraper_task" sequence="10"/>
+</odoo> 
